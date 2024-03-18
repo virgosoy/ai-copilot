@@ -4,7 +4,7 @@ ARG NODE_VERSION=20.11.1
 # 基于镜像node版本
 # FROM node:20.11.1
 # FROM node:20.11.1-slim
-FROM node:${NODE_VERSION}
+FROM node:${NODE_VERSION}-slim
 
 # 设置环境变量
 # ENV NODE_ENV=production
