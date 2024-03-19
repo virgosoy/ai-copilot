@@ -1,0 +1,8 @@
+{
+  // 代码缩进 2 格
+  "editor.tabSize": 2,
+  "i18n-ally.localesPaths": [],
+  "i18n-ally.enabledFrameworks": [
+    "vue"
+  ]
+}
