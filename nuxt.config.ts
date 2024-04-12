@@ -5,6 +5,17 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@nuxtjs/i18n',
   ],
+  runtimeConfig: {
+    openaiApiKey: process.env.OPENAI_API_KEY,
+    openaiBaseUrl: process.env.OPENAI_BASE_URL,
+    ollamaBaseUrl: process.env.OLLAMA_BASE_URL,
+  },
+  ui: {
+    icons: [
+      // 'heroicons', 
+      'carbon',
+    ],
+  },
   i18n: {
     locales: [{
       code: 'zh-CN',
