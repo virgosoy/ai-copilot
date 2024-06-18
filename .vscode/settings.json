@@ -4,5 +4,8 @@
   "i18n-ally.localesPaths": [],
   "i18n-ally.enabledFrameworks": [
     "vue"
-  ]
+  ],
+  "[python]": {
+    "editor.tabSize": 4
+  }
 }

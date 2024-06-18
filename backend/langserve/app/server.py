@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import RedirectResponse
 from langserve import add_routes
 
@@ -18,9 +18,98 @@ async def redirect_root_to_docs():
 # Edit this to add the chain you want to add
 # add_routes(app, NotImplemented)
 
+# region 模板路由
+from rag_chroma_multi_modal import chain as rag_chroma_multi_modal_chain
+add_routes(app, rag_chroma_multi_modal_chain, path="/rag-chroma-multi-modal")
+
+from chain_of_note_wiki import chain as chain_of_note_wiki_chain
+add_routes(app, chain_of_note_wiki_chain, path="/chain-of-note-wiki")
+
+# endregion
+
 # region 添加路由
-from .chains.hello_world.chain import chain
+from .chains.demo.hello_world.chain import chain
 add_routes(app, chain, path="/hello-world")
+
+from .chains.rag.word import chain
+add_routes(app, chain, path="/word")
+
+from .chains.rag import chain
+add_routes(app, chain, path="/rag")
+
+from .chains.rag.xiaofeizhequanyi_demo import chain
+add_routes(app, chain, path="/xiaofeizhequanyi")
+
+from .chains.rag.pdf import chain
+add_routes(app, chain, path="/pdf")
+
+from .chains.rag.pdf_and_spacy import chain
+add_routes(app, chain, path="/pdf-and-spacy")
+
+from .chains.rag.pdf_and_spacy_multi_query import chain
+add_routes(app, chain, path="/pdf-and-spacy-multi-query")
+
+from .chains.load_document.file_processing import chain
+add_routes(
+    app,
+    chain,
+    config_keys=["configurable"],
+    path="/pdf-file-processing",
+)
+
+from .chains.demo.chat_history.tuples import chain1, chain2, chain3
+add_routes(
+    app,
+    chain1,
+    config_keys=["configurable"],
+    path="/chat-history-tuples-1"
+)
+add_routes(
+    app,
+    chain2,
+    config_keys=["configurable"],
+    path="/chat-history-tuples-2"
+)
+add_routes(
+    app,
+    chain3,
+    config_keys=["configurable"],
+    path="/chat-history-tuples-3"
+)
+
+from .chains.vision.vision import chain,chain2,chain3
+add_routes(app, chain, path="/vision")
+add_routes(app, chain2, path="/vision-2")
+add_routes(app, chain3, path="/vision-3")
+
+from .chains.demo.hello_world.chat_playground import chain
+add_routes(
+    app,
+    chain,
+    path="/chat-playground",
+    enable_feedback_endpoint=True,
+    enable_public_trace_link_endpoint=True,
+    playground_type="chat",
+)
+
+from .chains.chat.chat_and_vision import chain1
+add_routes(app, chain1, path="/chat-and-vision-1")
+
+# endregion
+
+# region 纯路由
+from .chains.load_document import save_files
+
+@app.post('/upload-files')
+async def upload_files(files: list[UploadFile]):
+    result = await save_files(files)
+    return result
+
+from .chains.load_document import load_local_pdf_and_spacy
+@app.get('/load-local-file')
+async def load_local_file():
+    await load_local_pdf_and_spacy()
+    return "success"
 
 # endregion
 

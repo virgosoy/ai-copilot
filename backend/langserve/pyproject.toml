@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "langserve"
+name = "my-langserve"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
@@ -13,6 +13,9 @@ python = "^3.11"
 uvicorn = "^0.23.2"
 langserve = {extras = ["server"], version = ">=0.0.30"}
 pydantic = "<2"
+python-multipart = "^0.0.9"
+rag-chroma-multi-modal = {path = "packages\\rag-chroma-multi-modal", develop = true}
+chain-of-note-wiki = {path = "packages\\chain-of-note-wiki", develop = true}
 
 
 [tool.poetry.group.dev.dependencies]
