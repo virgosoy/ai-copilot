@@ -2,6 +2,13 @@
 <script setup lang="ts">
 /**
  * @version 0.1.0.240619
+ * @example
+ * ```ts
+ * const fileComp = ref<InstanceType<typeof SyHiddenInputFile>>()
+ * ```
+ * ```html
+ * <SyHiddenInputFile ref="fileComp" @fileSelect="handleFileSelected" />
+ * ```
  */
 
 defineOptions({
