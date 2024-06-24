@@ -19,8 +19,10 @@ async def redirect_root_to_docs():
 # add_routes(app, NotImplemented)
 
 # region 模板路由
-from rag_chroma_multi_modal import chain as rag_chroma_multi_modal_chain
-add_routes(app, rag_chroma_multi_modal_chain, path="/rag-chroma-multi-modal")
+
+# 模块加载 Chroma 太久，故注释
+# from rag_chroma_multi_modal import chain as rag_chroma_multi_modal_chain
+# add_routes(app, rag_chroma_multi_modal_chain, path="/rag-chroma-multi-modal")
 
 from chain_of_note_wiki import chain as chain_of_note_wiki_chain
 add_routes(app, chain_of_note_wiki_chain, path="/chain-of-note-wiki")
@@ -31,25 +33,25 @@ add_routes(app, chain_of_note_wiki_chain, path="/chain-of-note-wiki")
 from .chains.demo.hello_world.chain import chain
 add_routes(app, chain, path="/hello-world")
 
-from .chains.rag.word import chain
+from .chains.demo.rag.word import chain
 add_routes(app, chain, path="/word")
 
-from .chains.rag import chain
+from .chains.demo.rag import chain
 add_routes(app, chain, path="/rag")
 
-from .chains.rag.xiaofeizhequanyi_demo import chain
+from .chains.demo.rag.xiaofeizhequanyi_demo import chain
 add_routes(app, chain, path="/xiaofeizhequanyi")
 
-from .chains.rag.pdf import chain
+from .chains.demo.rag.pdf import chain
 add_routes(app, chain, path="/pdf")
 
-from .chains.rag.pdf_and_spacy import chain
+from .chains.demo.rag.pdf_and_spacy import chain
 add_routes(app, chain, path="/pdf-and-spacy")
 
-from .chains.rag.pdf_and_spacy_multi_query import chain
+from .chains.demo.rag.pdf_and_spacy_multi_query import chain
 add_routes(app, chain, path="/pdf-and-spacy-multi-query")
 
-from .chains.load_document.file_processing import chain
+from .chains.demo.load_document.file_processing import chain
 add_routes(
     app,
     chain,
@@ -92,20 +94,26 @@ add_routes(
     playground_type="chat",
 )
 
-from .chains.chat.chat_and_vision import chain1
+from .chains.chat.chat_and_vision import chain1, chain2
 add_routes(app, chain1, path="/chat-and-vision-1")
+add_routes(app, chain2, path="/chat-and-vision-2")
+
+from .chains.rag.local_knowledge_rag import chain_text, chain_test_2, chain_vision
+add_routes(app, chain_text, path="/local-knowledge-rag-text")
+add_routes(app, chain_test_2, path="/local-knowledge-rag-test-2")
+add_routes(app, chain_vision, path="/local-knowledge-rag-vision")
 
 # endregion
 
 # region 纯路由
-from .chains.load_document import save_files
+from .chains.demo.load_document import save_files
 
 @app.post('/upload-files')
 async def upload_files(files: list[UploadFile]):
     result = await save_files(files)
     return result
 
-from .chains.load_document import load_local_pdf_and_spacy
+from .chains.demo.load_document import load_local_pdf_and_spacy
 @app.get('/load-local-file')
 async def load_local_file():
     await load_local_pdf_and_spacy()

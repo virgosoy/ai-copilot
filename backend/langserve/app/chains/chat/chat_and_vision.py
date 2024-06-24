@@ -34,3 +34,29 @@ model = ChatOpenAI()
 chat_model = RunnableParallel({"answer": (RunnableLambda(_format_to_messages) | model)})
 
 chain1 = chat_model.with_types(input_type=ChatHistory)
+
+
+
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+# Declare a chain
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", "You are a helpful, professional assistant named Cob."),
+        MessagesPlaceholder(variable_name="messages"),
+    ]
+)
+
+from langchain.pydantic_v1 import BaseModel
+class InputChat(BaseModel):
+    """Input for the chat endpoint."""
+    messages: list[HumanMessage | AIMessage | SystemMessage] = Field(
+        ...,
+        description="The chat messages representing the current conversation.",
+    )
+    
+chain2 = (
+    prompt
+    | ChatOpenAI(model="gpt-4-turbo")
+).with_types(
+    input_type=InputChat
+)

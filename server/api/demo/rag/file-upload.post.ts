@@ -30,21 +30,6 @@ export default defineEventHandler(async (event) => {
   await vectorStore.addDocuments(allSplits)
 })
 
-/**
- * 数组 转 MultiMap（即 `{K: V[]}`）
- * @param arr 数组
- * @param key 产生的 MultiMap 的 key 值
- * @returns MultiMap
- * @version 1.0.0.240409
- */
-function arrToMultiMap<T, K extends keyof T, NK extends T[K] & (string | number)>(arr: T[], key: K){
-  const result = {} as Record<NK, T[]>
-  arr.forEach(item => {
-    (result[item[key] as NK] ??= []).push(item)
-  })
-  return result
-}
-
 const extMapLoader = {
   csv: CSVLoader,
   docx: DocxLoader,

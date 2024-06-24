@@ -56,7 +56,7 @@ chain = (
         "base64_images": lambda x: [x.file],
         "text": lambda x: x.text
     }
-    | RunnableLambda(lambda x: img_message(**x))
+    | RunnableLambda(lambda x: [img_message(**x)])
     | model
     | StrOutputParser()
 ).with_types(input_type=FileProcessingRequest)
@@ -66,7 +66,7 @@ chain2 = (
         "base64_images": lambda x: x.files,
         "text": lambda x: x.text
     }
-    | RunnableLambda(lambda x: img_message(**x))
+    | RunnableLambda(lambda x: [img_message(**x)])
     | model
     | StrOutputParser()
 ).with_types(input_type=FileProcessReq2)
@@ -76,7 +76,7 @@ chain3 = (
         "base64_images": lambda x: x.files,
         "text": lambda x: x.text
     }
-    | RunnableLambda(lambda x: img_message(**x))
+    | RunnableLambda(lambda x: [img_message(**x)])
     | model
     | StrOutputParser()
 ).with_types(input_type=FileProcessReq3)

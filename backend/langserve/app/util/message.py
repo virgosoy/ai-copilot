@@ -10,7 +10,9 @@ def img_message(base64_images: list[str], text: str):
     :param base64_images: 图像列表。
     :param text: 文本提示。
     :return: 包含每个图像和文本提示的消息对象列表。
-    @version 240603
+    @version 
+        240624 返回值修改为单个对象
+        240603
     """
     messages = []
     text_message = {
@@ -25,5 +27,5 @@ def img_message(base64_images: list[str], text: str):
                 "image_url": {"url": f"data:image/jpeg;base64,{image}"},
             }
             messages.append(image_message)
-    return [HumanMessage(content=messages)]
+    return HumanMessage(content=messages)
 
