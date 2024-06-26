@@ -60,3 +60,11 @@ chain2 = (
 ).with_types(
     input_type=InputChat
 )
+
+# chain2 = (
+#     RunnableLambda(
+#         lambda x: x
+#     )
+# ).with_types(
+#     input_type=InputChat
+# )
