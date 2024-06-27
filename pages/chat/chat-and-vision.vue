@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import LuAiMessgae from '~/components/lu/LuAiMessgae.vue';
+import LuAiMessage from '~/components/lu/LuAiMessage.vue';
 import LuHumanMessage from '~/components/lu/LuHumanMessage.vue';
 import SyHiddenInputFile from '~/components/sy/SyHiddenInputFile.vue';
 import { useMarkdown } from '~/composables/useMarkdown';
@@ -60,18 +60,18 @@ async function removeImagePromptByIndex(index: number){
             <div v-else v-html="markdown.render(content.text)"></div>
           </template>
         </LuHumanMessage>
-        <LuAiMessgae v-if="message.type === 'ai'">
+        <LuAiMessage v-if="message.type === 'ai'">
           <div v-html="markdown.render(message.content)"></div>
-        </LuAiMessgae>
+        </LuAiMessage>
       </template>
       <LuHumanMessage>
         <img v-for="du in imagePromptDataUrls" :src="du"/>
         <div v-html="markdown.render(prompt)"></div>
       </LuHumanMessage>
-      <!-- <LuAiMessgae>
+      <!-- <LuAiMessage>
         <!== <p>{{ aiResponse }}</p> ==>
         <div v-html="markdown.render(aiResponse)"></div>
-      </LuAiMessgae> -->
+      </LuAiMessage> -->
     </div>
     <!-- file panel above input -->
     <div

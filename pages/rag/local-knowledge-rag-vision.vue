@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import LuAiMessgae from '~/components/lu/LuAiMessgae.vue';
+import LuAiMessage from '~/components/lu/LuAiMessage.vue';
 import LuHumanMessage from '~/components/lu/LuHumanMessage.vue';
 import SyHiddenInputFile from '~/components/sy/SyHiddenInputFile.vue';
 import { useMarkdown } from '~/composables/useMarkdown';
@@ -144,19 +144,19 @@ async function removeImagePromptByIndex(index: number){
           <p>What are three great applications of quantum computing?</p>
         </div>
       </div>
-      <LuAiMessgae>
+      <LuAiMessage>
         <p>Three great applications of quantum computing are: Optimization of
             complex problems, Drug Discovery and Cryptography.</p>
-      </LuAiMessgae> -->
+      </LuAiMessage> -->
       <LuHumanMessage>
         <img v-for="du in imagePromptDataUrls" :src="du"/>
         <!-- <p>{{ prompt }}</p> -->
         <div v-html="markdown.render(prompt)"></div>
       </LuHumanMessage>
-      <LuAiMessgae>
+      <LuAiMessage>
         <!-- <p>{{ aiResponse }}</p> -->
         <div v-html="markdown.render(aiResponse)"></div>
-      </LuAiMessgae>
+      </LuAiMessage>
     </div>
     <!-- file panel above input -->
     <div
