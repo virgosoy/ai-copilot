@@ -52,18 +52,7 @@ async function removeImagePromptByIndex(index: number){
     <div
       class="flex-1 space-y-6 overflow-y-auto rounded-xl bg-slate-200 p-4 text-sm leading-6 text-slate-900 shadow-sm dark:bg-slate-900 dark:text-slate-300 sm:text-base sm:leading-7"
     >
-      <template v-for="message in messages">
-        <LuHumanMessage v-if="message.type === 'human'">
-          <template v-for="content in message.content.toSorted(comparatorOfEnum('type', ['image_url', 'text']))">
-            <img v-if="content.type === 'image_url'" 
-              :src="content.image_url.url"/>
-            <div v-else v-html="markdown.render(content.text)"></div>
-          </template>
-        </LuHumanMessage>
-        <LuAiMessage v-if="message.type === 'ai'">
-          <div v-html="markdown.render(message.content)"></div>
-        </LuAiMessage>
-      </template>
+      <LuHistoryMessages :messages="messages"></LuHistoryMessages>
       <LuHumanMessage>
         <img v-for="du in imagePromptDataUrls" :src="du"/>
         <div v-html="markdown.render(prompt)"></div>
