@@ -61,6 +61,16 @@ chain2 = (
     input_type=InputChat
 )
 
+from langchain_core.output_parsers import StrOutputParser
+
+chain3 = (
+    prompt
+    | ChatOpenAI(model="gpt-4-turbo")
+    | StrOutputParser()
+).with_types(
+    input_type=InputChat
+)
+
 # chain2 = (
 #     RunnableLambda(
 #         lambda x: x
