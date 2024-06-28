@@ -97,4 +97,47 @@ chain_vision = (
     | StrOutputParser()
     
 ).with_types(input_type=VisionReq)
-# TODO:
+
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
+from langchain.pydantic_v1 import BaseModel
+class ChatAndVisionReq(CustomUserType):
+    history_messages: list[HumanMessage | AIMessage | SystemMessage] = Field(
+        ...,
+        description="The chat history messages representing the current conversation.",
+    )
+    current_message: HumanMessage = Field(
+        ...,
+        description="The current message.",
+        extra={"widget": {"type": "chat"}},
+    )
+    
+chat_and_vision_prompt_template = ChatPromptTemplate.from_messages([
+    ('system', '你是问答任务的助手。使用以下检索到的上下文来回答问题。如果你不知道答案，就说你不知道。最多使用三个句子并保持答案简洁。'),
+    ('human', '上下文: {context}'),
+    MessagesPlaceholder(variable_name="history"),
+    MessagesPlaceholder(variable_name="question")
+])
+from operator import itemgetter
+chain_chat_and_vision = (
+    RunnableParallel({
+        "context": { "human": lambda x: [x.current_message] }
+            | question_prompt_template
+            | model
+            | StrOutputParser()
+            | retriever
+            | format_docs,
+        "history": lambda x: x.history_messages,
+        "question": lambda x: [x.current_message],
+    })
+    | chat_and_vision_prompt_template
+    | model
+    | StrOutputParser()
+).with_types(input_type=ChatAndVisionReq)
+
+
+# chain_chat_and_vision = (
+#     RunnableLambda(
+#         lambda x: x
+#     )
+# ).with_types(input_type=ChatAndVisionReq)
+

@@ -33,3 +33,44 @@ export function multipartsToFormData(multiparts: MultiPartData[]){
   })
   return formData
 }
+
+import { RemoteRunnable } from "@langchain/core/runnables/remote";
+import type { RunnableConfig } from '@langchain/core/runnables'
+// import type { H3Event } from 'h3'
+
+/**
+ * 使用 RemoteRunnable \
+ * 需要在初始化上下文中使用，以获取 useRuntimeConfig
+ * @param event H3Event
+ * @param runnableUrl 例如 playground 是 http://xxx/my-runnable/playground，则此值为 my-runnable
+ * @returns -
+ * @version 2024-06-28
+ * @since 2024-06-28
+ * @example
+ * ```ts
+ * // /server/api/my-runnable.post.ts
+ * import { useRemoteRunnable } from "~/server/utils/common";
+ * 
+ * export default defineEventHandler(async (event) => {
+ *   type ChainInputType = { text: string }
+ *   const body = await readBody<ChainInputType>(event)
+ *   // ★
+ *   const remoteChain = useRemoteRunnable<ChainInputType, string>("my-runnable")
+ *   const result = await remoteChain.invoke(body)
+ *   return result
+ * })
+ * ```
+ */
+export function useRemoteRunnable<
+  RunInput = any, 
+  RunOutput = any, 
+  CallOptions extends RunnableConfig = RunnableConfig
+>(
+  runnableUrl: string
+){
+  const cfg = useRuntimeConfig()
+  const remoteChain = new RemoteRunnable<RunInput, RunOutput, CallOptions>({
+    url: `${cfg.langserveBaseUrl}/${runnableUrl}`,
+  });
+  return remoteChain
+}
