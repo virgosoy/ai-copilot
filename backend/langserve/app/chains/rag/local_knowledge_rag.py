@@ -101,11 +101,11 @@ chain_vision = (
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
 from langchain.pydantic_v1 import BaseModel
 class ChatAndVisionReq(CustomUserType):
-    history_messages: list[HumanMessage | AIMessage | SystemMessage] = Field(
+    historyMessages: list[HumanMessage | AIMessage | SystemMessage] = Field(
         ...,
         description="The chat history messages representing the current conversation.",
     )
-    current_message: HumanMessage = Field(
+    currentMessage: HumanMessage = Field(
         ...,
         description="The current message.",
         extra={"widget": {"type": "chat"}},
@@ -120,14 +120,14 @@ chat_and_vision_prompt_template = ChatPromptTemplate.from_messages([
 from operator import itemgetter
 chain_chat_and_vision = (
     RunnableParallel({
-        "context": { "human": lambda x: [x.current_message] }
+        "context": { "human": lambda x: [x.currentMessage] }
             | question_prompt_template
             | model
             | StrOutputParser()
             | retriever
             | format_docs,
-        "history": lambda x: x.history_messages,
-        "question": lambda x: [x.current_message],
+        "history": lambda x: x.historyMessages,
+        "question": lambda x: [x.currentMessage],
     })
     | chat_and_vision_prompt_template
     | model
