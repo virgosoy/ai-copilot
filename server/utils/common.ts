@@ -74,3 +74,36 @@ export function useRemoteRunnable<
   });
   return remoteChain
 }
+
+
+
+import type { IterableReadableStream } from '@langchain/core/utils/stream'
+
+/**
+ * 结合 remoteRunnable 的 stream 方法的返回值，将结果返回给客户端 \
+ * 根据 stream 方法的返回结果，模拟直接 http 调用服务端 url 的返回结果。
+ * @param sse useSseServer 的返回值
+ * @param result remoteRunnable 的 stream 方法的返回值
+ * @since 2024-07-02
+ * @version 2024-07-02
+ * @example
+ * ```ts
+ * const result = await remoteRunnable.stream(..)
+ * const sse = useSseServer(event.node)
+ * await sseReturn(sse, result)
+ * // 结束
+ * ```
+ */
+export async function sseReturn<T>(sse: any, result: IterableReadableStream<T>){
+  let isFirst = true
+  for await (const chunk of result) {
+    console.log(chunk)
+    if(isFirst){
+      isFirst = false
+      sse.send('metadata', JSON.stringify(chunk))
+    }else{
+      sse.send('data', JSON.stringify(chunk))
+    }
+  }
+  sse.close({event: 'end'})
+}
