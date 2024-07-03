@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * @deprecated 使用 chat-and-vision.vue
+ */
+
 import LuAiMessage from '~/components/lu/LuAiMessage.vue';
 import LuHumanMessage from '~/components/lu/LuHumanMessage.vue';
 import SyHiddenInputFile from '~/components/sy/SyHiddenInputFile.vue';
@@ -23,23 +27,14 @@ async function sendMessage(){
   )
   imagePromptDataUrls.value = []
   prompt.value = ''
-
-  const sse = useSseClient('/api/langserve/chat-and-vision-3-stream', {
+  aiResponse.value = await $fetch('/api/langserve/chat-and-vision-3', {
     method: 'POST',
     body: {
       messages: messages.value
-    },
-    closeEvents: ['end'],
-    receiveHandlers: [({event, data}) => {
-      if(event === 'data'){
-        aiResponse.value += data
-      }
-    }],
-    serverCloseHandlers: [() => {
-      messages.value.push(createAIMessage(aiResponse.value))
-      aiResponse.value = ''
-    }]
+    }
   })
+  messages.value.push(createAIMessage(aiResponse.value))
+  aiResponse.value = ''
 }
 
 async function handleAttachFile(){
@@ -62,14 +57,14 @@ async function removeImagePromptByIndex(index: number){
       class="flex-1 space-y-6 overflow-y-auto rounded-xl bg-slate-200 p-4 text-sm leading-6 text-slate-900 shadow-sm dark:bg-slate-900 dark:text-slate-300 sm:text-base sm:leading-7"
     >
       <LuHistoryMessages :messages="messages"></LuHistoryMessages>
-      <LuAiMessage v-if="aiResponse">
-        <!-- <p>{{ aiResponse }}</p> -->
-        <div v-html="markdown.render(aiResponse)"></div>
-      </LuAiMessage>
-      <LuHumanMessage v-if="imagePromptDataUrls.length || prompt">
+      <LuHumanMessage>
         <img v-for="du in imagePromptDataUrls" :src="du"/>
         <div v-html="markdown.render(prompt)"></div>
       </LuHumanMessage>
+      <!-- <LuAiMessage>
+        <!== <p>{{ aiResponse }}</p> ==>
+        <div v-html="markdown.render(aiResponse)"></div>
+      </LuAiMessage> -->
     </div>
     <!-- file panel above input -->
     <div

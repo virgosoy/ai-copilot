@@ -3,6 +3,9 @@ import { RemoteRunnable } from "@langchain/core/runnables/remote";
 // import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { BaseMessageJsonObj } from "~/utils/common";
 
+/**
+ * @deprecated 使用 chat-and-vision-3-stream.post.ts
+ */
 export default defineEventHandler(async (event) => {
   
   type ChainInputType = {
