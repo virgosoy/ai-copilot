@@ -20,6 +20,9 @@ dependencies:
   cheerio:
     specifier: 1.0.0-rc.12
     version: 1.0.0-rc.12
+  fast-json-patch:
+    specifier: ^3.1.1
+    version: 3.1.1
   langchain:
     specifier: ^0.1.28
     version: 0.1.28(axios@1.6.8)(cheerio@1.0.0-rc.12)(mammoth@1.7.1)(pdf-parse@1.1.1)(puppeteer@22.6.4)(typeorm@0.3.20)
@@ -4433,6 +4436,10 @@ packages:
       glob-parent: 5.1.2
       merge2: 1.4.1
       micromatch: 4.0.5
+
+  /fast-json-patch@3.1.1:
+    resolution: {integrity: sha512-vf6IHUX2SBcA+5/+4883dsIjpBTqmfBjmYiWK1savxQmFk4JfBMLa7ynTYOs1Rolp/T1betJxHiGD3g1Mn8lUQ==}
+    dev: false
 
   /fastq@1.17.1:
     resolution: {integrity: sha512-sRVD3lWVIXWg6By68ZN7vho9a1pQcN/WBFaAAsDDFzlJjvoGx0P8z7V1t72grFJfJhu3YPZBuu25f7Kaw2jN1w==}

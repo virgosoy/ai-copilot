@@ -1,5 +1,5 @@
 
-import { sseReturnByStream } from "~/server/utils/common";
+import { sseReturnByStreamLog } from "~/server/utils/common";
 // import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { BaseMessageJsonObj } from "~/utils/common";
 
@@ -13,10 +13,10 @@ export default defineEventHandler(async (event) => {
 
   const remoteChain = useRemoteRunnable<ChainInputType, string>("chat-and-vision-3")
 
-  const result = await remoteChain.stream(body)
+  const result = remoteChain.streamLog(body)
 
   const sse = useSseServer(event.node)
-  await sseReturnByStream(sse, result)
+  await sseReturnByStreamLog(sse, result)
 
   // return result
 })
