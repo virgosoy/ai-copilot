@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useLangServeStreamResultCallback } from '~/utils/common';
+
 
 const body = {
         "messages": [
@@ -21,15 +23,11 @@ const body = {
 
 const result = ref('')
 function onclick() {
-  const sse = useSseClient<{'data': string, 'end': undefined}>('/api/langserve/chat-and-vision-3-stream', {
-    method: 'POST', 
+  useLangServeStreamResultCallback<unknown, string>(
+    '/api/langserve/chat-and-vision-3-stream', 
     body,
-    receiveHandlers: [({event, data}) => {
-      if(event === 'data') {
-        result.value += data
-      }
-    }],
-  })
+    data => result.value += data
+  )
 }
 </script>
 

@@ -4,6 +4,7 @@
  * @param arr 数组
  * @param key 产生的 MultiMap 的 key 值
  * @returns MultiMap
+ * @author doc-snippet
  * @version 1.0.0.240409
  */
 export function arrToMultiMap<T, K extends keyof T, NK extends T[K] & (string | number)>(arr: T[], key: K){
@@ -18,6 +19,7 @@ import type { MultiPartData } from 'h3'
 /**
  * MultiPartData[] 转 FormData 
  * @param multiparts 
+ * @author doc-snippet
  * @version 1.0.0.240429
  */
 export function multipartsToFormData(multiparts: MultiPartData[]){
@@ -138,4 +140,102 @@ export async function sseReturnByStreamLog(
     sse.send('data', JSON.stringify(chunk))
   }
   sse.close({event: 'end'})
+}
+
+/**
+ * 使用中转 LangServe 服务
+ * @param event H3Event
+ * @returns 中转工具
+ * @version 2024-07-08
+ * @example
+ * ```ts
+ * type ChainInputType = {
+ *   messages: string
+ * }
+ * // 请求体
+ * const body = await readBody<ChainInputType>(event)
+ * const t = useTransferLangServe(event)
+ * return t.fetch<ChainInputType, string>('my-runnable', 'stream_log', {
+ *   input: body
+ * })
+ * ```
+ */
+export function useTransferLangServe(event: H3Event) {
+  const cfg = useRuntimeConfig()
+
+  function url(
+    runnableUrl: string, 
+    runnableMethod: 'invoke' | 'stream' | 'stream_log'
+  ){
+    return `${cfg.langserveBaseUrl}/${runnableUrl}/${runnableMethod}`
+  }
+
+  type RunnableMethod = 'invoke' | 'stream' | 'stream_log'
+  type FetchResult<RM extends RunnableMethod, RunOutput> = {
+    invoke: RunOutput
+    stream: ReadableStream<Uint8Array>
+    stream_log: ReadableStream<Uint8Array>
+  }[RM]
+  
+  async function fetch<
+    RunInput extends BodyInit | Record<string, any> | null | undefined = any, 
+    RunOutput = any, 
+    CallOptions extends RunnableConfig = RunnableConfig,
+    RM extends RunnableMethod = RunnableMethod
+  >(
+    runnableUrl: string, 
+    runnableMethod: RM,
+    opts: { input: RunInput, config?: CallOptions },
+  ): Promise<FetchResult<RM, RunOutput>> {
+    switch(runnableMethod){
+      case 'invoke':
+        return $fetch<RunOutput>(url(runnableUrl, runnableMethod), {
+          method: 'POST',
+          body: opts,
+        }) satisfies Promise<RunOutput> as Promise<FetchResult<RM, RunOutput>>
+      case 'stream':
+      case 'stream_log':
+        setSseResHeader(event)
+        return $fetchSse<RunOutput>(url(runnableUrl, runnableMethod), {
+          method: 'POST',
+          body: opts,
+        }) satisfies Promise<ReadableStream<Uint8Array>> as Promise<FetchResult<RM, RunOutput>>
+      default:
+        const _exhaustiveCheck: never = runnableMethod;
+        return _exhaustiveCheck;
+    }
+  }
+
+  return {
+    // url,
+    fetch,
+  }
+}
+
+import type { ReadableStream } from 'node:stream/web'
+import type { NitroFetchRequest, NitroFetchOptions } from 'nitropack'
+/**
+ * 获取 SSE，返回 ReadableStream<Uint8Array>
+ * @author doc-snippet
+ * @version 0.1.0.240705
+ */
+async function $fetchSse<
+  T = unknown, 
+  R extends NitroFetchRequest = NitroFetchRequest, 
+  O extends NitroFetchOptions<R> = NitroFetchOptions<R>
+>(request: R, opts ?: O){
+  return $fetch<T, R>(request, {
+    ...opts,
+    responseType: 'stream'
+  }) as Promise<ReadableStream<Uint8Array>>
+}
+
+import type { H3Event } from 'h3'
+function setSseResHeader(event: H3Event){
+  const res = event.node.res
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+  });
 }

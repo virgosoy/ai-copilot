@@ -121,3 +121,78 @@ export function createImgMessage(base64Images: string[], text: string): HumanMes
     type: 'human'
   } // HumanMessage
 }
+
+
+import type { NitroFetchRequest } from 'nitropack'
+import jsonpatch, { type Operation } from 'fast-json-patch'
+import type { RunState } from '@langchain/core/tracers/log_stream'
+
+/**
+ * 处理 nuxt 后端中转 langserve /stream_log 的响应
+ * @param url 
+ * @param body 
+ * @param streamLogResult 
+ * @version 2024-07-08
+ * @example
+ * ```ts
+ * import type { RunState } from '@langchain/core/tracers/log_stream'
+ * const result = ref<RunState>()
+ * useLangServeStreamLogResultFetch(
+ *   '/api/langserve/xxx', // 必须是和 langserve /stream_log 一样的响应类型
+ *   body,
+ *   result,
+ * )
+ * ```
+ */
+export function useLangServeStreamLogResultFetch<Req>(
+  url: NitroFetchRequest,
+  body: Req,
+  streamLogResult: Ref<RunState | undefined>
+) {
+  const sse = useSseClient<
+    {'data': { ops: Operation[]}, 'end': undefined}
+  >(url, {
+    method: 'POST', 
+    body,
+    receiveHandlers: [({event, data}) => {
+      if(event === 'data') {
+        streamLogResult.value = jsonpatch.applyPatch(streamLogResult.value, data.ops, true, false).newDocument
+      }
+    }],
+  })
+}
+
+/**
+ * 处理 nuxt 后端中转 langserve /stream 的响应
+ * 其实和 useSseClient 非常类似，只是对 event data 做了点过滤。
+ * @param url 
+ * @param body 
+ * @param resultDataCallback 
+ * @version 2024-07-08
+ * @example
+ * ```ts
+ * const result = ref('')
+ * useLangServeStreamResultCallback<unknown, string>(
+ *   '/api/langserve/xxx',
+ *   body,
+ *   data => result.value += data
+ * )
+ * ```
+ */
+export function useLangServeStreamResultCallback<Req, RunOutput>(
+  url: NitroFetchRequest,
+  body: Req,
+  resultDataCallback: (data: RunOutput) => void
+){
+  const sse = useSseClient<
+    {'data': RunOutput, 'end': undefined}
+  >(url, {
+    method: 'POST', 
+    body,
+    receiveHandlers: [({event, data}) => {
+      if(event === 'data') {
+        resultDataCallback(data)
+      }
+    }],
+  })
+}
