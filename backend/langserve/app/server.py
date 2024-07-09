@@ -99,10 +99,16 @@ add_routes(app, chain1, path="/chat-and-vision-1")
 add_routes(app, chain2, path="/chat-and-vision-2")
 add_routes(app, chain3, path="/chat-and-vision-3")
 
-from .chains.rag.local_knowledge_rag import chain_text, chain_test_2, chain_vision
+from .chains.rag.local_knowledge_rag import chain_text, chain_test_2, chain_vision, chain_chat_and_vision
 add_routes(app, chain_text, path="/local-knowledge-rag-text")
 add_routes(app, chain_test_2, path="/local-knowledge-rag-test-2")
 add_routes(app, chain_vision, path="/local-knowledge-rag-vision")
+add_routes(app, chain_chat_and_vision, path="/local-knowledge-rag-chat-and-vision")
+
+from .chains.demo.configure import chain, chain1, chain2
+add_routes(app, chain, path="/configure")
+add_routes(app, chain1, path="/configure1")
+add_routes(app, chain2, path="/configure2")
 
 # endregion
 

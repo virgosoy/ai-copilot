@@ -26,7 +26,9 @@ function onclick() {
   useLangServeStreamResultCallback<unknown, string>(
     '/api/langserve/chat-and-vision-3-stream', 
     body,
-    data => result.value += data
+    {
+      onData: data => result.value += data
+    },
   )
 }
 </script>

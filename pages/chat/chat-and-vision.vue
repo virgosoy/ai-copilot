@@ -24,21 +24,16 @@ async function sendMessage(){
   imagePromptDataUrls.value = []
   prompt.value = ''
 
-  const sse = useSseClient('/api/langserve/chat-and-vision-3-stream', {
-    method: 'POST',
-    body: {
-      messages: messages.value
+  useLangServeStreamResultCallback('/api/langserve/chat-and-vision-3-stream', {
+    messages: messages.value
+  },{
+    onData(data) {
+      aiResponse.value += data
     },
-    closeEvents: ['end'],
-    receiveHandlers: [({event, data}) => {
-      if(event === 'data'){
-        aiResponse.value += data
-      }
-    }],
-    serverCloseHandlers: [() => {
+    onEnd() {
       messages.value.push(createAIMessage(aiResponse.value))
       aiResponse.value = ''
-    }]
+    }
   })
 }
 

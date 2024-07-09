@@ -167,22 +167,29 @@ export function useLangServeStreamLogResultFetch<Req>(
  * 其实和 useSseClient 非常类似，只是对 event data 做了点过滤。
  * @param url 
  * @param body 
- * @param resultDataCallback 
- * @version 2024-07-08
+ * @param [callback.onData]
+ * @param [callback.onEnd]
+ * @version 2024-07-09
  * @example
  * ```ts
  * const result = ref('')
  * useLangServeStreamResultCallback<unknown, string>(
  *   '/api/langserve/xxx',
- *   body,
- *   data => result.value += data
+ *   body,{
+ *     onData: (data) => {
+ *       result.value += data
+ *     }
+ *   }
  * )
  * ```
  */
 export function useLangServeStreamResultCallback<Req, RunOutput>(
   url: NitroFetchRequest,
   body: Req,
-  resultDataCallback: (data: RunOutput) => void
+  callback?: {
+    onData?: (data: RunOutput) => void,
+    onEnd?: () => void,
+  },
 ){
   const sse = useSseClient<
     {'data': RunOutput, 'end': undefined}
@@ -191,7 +198,9 @@ export function useLangServeStreamResultCallback<Req, RunOutput>(
     body,
     receiveHandlers: [({event, data}) => {
       if(event === 'data') {
-        resultDataCallback(data)
+        callback?.onData?.(data)
+      }else if(event === 'end') {
+        callback?.onEnd?.()
       }
     }],
   })
