@@ -143,10 +143,31 @@ export async function sseReturnByStreamLog(
 }
 
 /**
- * 使用中转 LangServe 服务
+ * ofetch 传入的 body 类型
+ */
+type OfetchBody = BodyInit | Record<string, any> | null | undefined
+type RunnableMethod = 'invoke' | 'stream' | 'stream_log'
+type LangServeReq<
+  RunInput extends OfetchBody, 
+  CallOptions extends RunnableConfig,
+> = { 
+  input: RunInput, config?: CallOptions 
+}
+export type LangServeTransferReq<
+  RunInput extends OfetchBody = any, 
+  CallOptions extends RunnableConfig = any,
+> = {
+  runnableUrl: string,
+  runnableMethod: RunnableMethod,
+  body: LangServeReq<RunInput, CallOptions>
+}
+
+/**
+ * 使用 LangServe 中转器
  * @param event H3Event
  * @returns 中转工具
- * @version 2024-07-08
+ * @version 2024-07-10
+ * @since 2024-07-08
  * @example
  * ```ts
  * type ChainInputType = {
@@ -154,23 +175,22 @@ export async function sseReturnByStreamLog(
  * }
  * // 请求体
  * const body = await readBody<ChainInputType>(event)
- * const t = useTransferLangServe(event)
+ * const t = useLangServeTransfer(event)
  * return t.fetch<ChainInputType, string>('my-runnable', 'stream_log', {
  *   input: body
  * })
  * ```
  */
-export function useTransferLangServe(event: H3Event) {
+export function useLangServeTransfer(event: H3Event) {
   const cfg = useRuntimeConfig()
 
   function url(
     runnableUrl: string, 
-    runnableMethod: 'invoke' | 'stream' | 'stream_log'
+    runnableMethod: RunnableMethod
   ){
     return `${cfg.langserveBaseUrl}/${runnableUrl}/${runnableMethod}`
   }
 
-  type RunnableMethod = 'invoke' | 'stream' | 'stream_log'
   type FetchResult<RM extends RunnableMethod, RunOutput> = {
     invoke: RunOutput
     stream: ReadableStream<Uint8Array>
@@ -185,20 +205,20 @@ export function useTransferLangServe(event: H3Event) {
   >(
     runnableUrl: string, 
     runnableMethod: RM,
-    opts: { input: RunInput, config?: CallOptions },
+    body: LangServeTransferReq<RunInput, CallOptions>['body'],
   ): Promise<FetchResult<RM, RunOutput>> {
     switch(runnableMethod){
       case 'invoke':
         return $fetch<RunOutput>(url(runnableUrl, runnableMethod), {
           method: 'POST',
-          body: opts,
+          body: body,
         }) satisfies Promise<RunOutput> as Promise<FetchResult<RM, RunOutput>>
       case 'stream':
       case 'stream_log':
         setSseResHeader(event)
         return $fetchSse<RunOutput>(url(runnableUrl, runnableMethod), {
           method: 'POST',
-          body: opts,
+          body: body,
         }) satisfies Promise<ReadableStream<Uint8Array>> as Promise<FetchResult<RM, RunOutput>>
       default:
         const _exhaustiveCheck: never = runnableMethod;

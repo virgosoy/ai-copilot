@@ -1,5 +1,5 @@
 
-import { useTransferLangServe } from "~/server/utils/common";
+import { useLangServeTransfer } from "~/server/utils/common";
 // import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { BaseMessageJsonObj } from "~/utils/common";
 
@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
 
   // const result = remoteChain.streamLog(body)
 
-  const t = useTransferLangServe(event)
+  const t = useLangServeTransfer(event)
   return t.fetch<ChainInputType>('chat-and-vision-3', 'stream_log', {
     input: body
   })
