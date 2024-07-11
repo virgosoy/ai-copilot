@@ -1,22 +1,31 @@
 <script setup lang="ts">
 /**
- * @deprecated 2024-07-09 使用 chat-and-vision.vue
+ * @deprecated 2024-07-11 使用 chat-and-vision.vue
  */
 import LuAiMessage from '~/components/lu/LuAiMessage.vue';
 import LuHumanMessage from '~/components/lu/LuHumanMessage.vue';
 import SyHiddenInputFile from '~/components/sy/SyHiddenInputFile.vue';
 import { useMarkdown } from '~/composables/useMarkdown';
 import { asyncMap } from '~/utils/PromiseUtils';
+import type { Body } from '~/server/api/langserve/chat-and-vision-3-stream-or-log.post';
 
 const markdown = useMarkdown()
 
 const messages = ref<BaseMessageJsonObj[]>([])
+const intermediateStepsOfMessages = ref<(Record<string, LogEntry> | undefined)[]>([])
 
 const fileComp = ref<InstanceType<typeof SyHiddenInputFile>>()
+
+const isIntermediateSteps = ref<boolean>(false)
 
 const prompt = ref('')
 const imagePromptDataUrls = ref<string[]>([])
 const aiResponse = ref('')
+
+import type { RunState, LogEntry } from '@langchain/core/tracers/log_stream'
+
+const intermediateSteps = ref<Record<string, LogEntry>>()
+
 async function sendMessage(){
   messages.value.push(
     createImgMessage(
@@ -27,17 +36,46 @@ async function sendMessage(){
   imagePromptDataUrls.value = []
   prompt.value = ''
 
-  useLangServeStreamResultFetch('/api/langserve/chat-and-vision-3-stream', {
-    messages: messages.value
-  },{
-    onData(data) {
-      aiResponse.value += data
-    },
-    onEnd() {
-      messages.value.push(createAIMessage(aiResponse.value))
-      aiResponse.value = ''
-    }
-  })
+  if(isIntermediateSteps.value){
+    useLangServeStreamLogResultFetch<Body>('/api/langserve/chat-and-vision-3-stream-or-log',{
+      runnableMethod: 'stream_log',
+      body: {
+        input: {
+          messages: messages.value
+        }
+      }
+    }, undefined, {
+      onData(data) {
+        aiResponse.value = data.final_output
+        intermediateSteps.value = data.logs
+      },
+      onEnd() {
+        messages.value.push(createAIMessage(aiResponse.value))
+        intermediateStepsOfMessages.value[messages.value.length - 1] = intermediateSteps.value
+        aiResponse.value = ''
+        intermediateSteps.value = undefined
+      }
+    })
+
+  }else{
+    useLangServeStreamResultFetch<Body>('/api/langserve/chat-and-vision-3-stream-or-log', {
+      runnableMethod: 'stream',
+      body: {
+        input: {
+          messages: messages.value
+        }
+      }
+    },{
+      onData(data) {
+        aiResponse.value += data
+      },
+      onEnd() {
+        messages.value.push(createAIMessage(aiResponse.value))
+        aiResponse.value = ''
+      }
+    })
+  }
+
 }
 
 async function handleAttachFile(){
@@ -50,6 +88,7 @@ async function handleFileSelected({files} : {event: Event, files: FileList}){
 async function removeImagePromptByIndex(index: number){
   imagePromptDataUrls.value.splice(index, 1)
 }
+
 </script>
 
 <template>
@@ -59,8 +98,8 @@ async function removeImagePromptByIndex(index: number){
     <div
       class="flex-1 space-y-6 overflow-y-auto rounded-xl bg-slate-200 p-4 text-sm leading-6 text-slate-900 shadow-sm dark:bg-slate-900 dark:text-slate-300 sm:text-base sm:leading-7"
     >
-      <LuHistoryMessages :messages="messages"></LuHistoryMessages>
-      <LuAiMessage v-if="aiResponse">
+      <LuHistoryMessages :messages="messages" :intermediateStepsOfMessages="intermediateStepsOfMessages"></LuHistoryMessages>
+      <LuAiMessage v-if="aiResponse" :intermediateSteps="intermediateSteps">
         <!-- <p>{{ aiResponse }}</p> -->
         <div v-html="markdown.render(aiResponse)"></div>
       </LuAiMessage>
@@ -111,30 +150,34 @@ async function removeImagePromptByIndex(index: number){
           ></textarea>
         </div>
         <div class="flex items-center justify-between px-2 py-2">
-          <SyHiddenInputFile ref="fileComp" @fileSelect="handleFileSelected" />
-          <button
-            type="button"
-            class="inline-flex cursor-pointer justify-center rounded-lg p-2 text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-600 dark:hover:text-slate-50"
-            @click="handleAttachFile"
-          >
-            <span class="sr-only">Attach file</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-              stroke="currentColor"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+          <div class="flex flex-row items-center">
+            <!-- upload -->
+            <SyHiddenInputFile ref="fileComp" @fileSelect="handleFileSelected" />
+            <button
+              type="button"
+              class="inline-flex cursor-pointer justify-center rounded-lg p-2 text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-600 dark:hover:text-slate-50"
+              @click="handleAttachFile"
             >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-              <path
-                d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5"
-              ></path>
-            </svg>
-            <span class="px-2 text-sm">Attach a file</span>
-          </button>
+              <span class="sr-only">Attach file</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path
+                  d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5"
+                ></path>
+              </svg>
+              <span class="px-2 text-sm">Attach a file</span>
+            </button>
+            <LuToggle v-model="isIntermediateSteps">Intermediate steps</LuToggle>
+          </div>
           <button
             type="submit"
             class="mr-1 inline-flex items-center gap-x-2 rounded-lg bg-blue-600 px-4 py-2.5 text-center text-sm font-medium text-slate-50 hover:bg-blue-800 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 sm:text-base"

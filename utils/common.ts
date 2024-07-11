@@ -181,13 +181,14 @@ export function useLangServeStreamLogResultFetch<Req>(
  * @param body 
  * @param [callback.onData]
  * @param [callback.onEnd]
- * @version 2024-07-10
- * @since 2024-07-10 泛型设置默认类型
+ * @version 2024-07-11 refactor: 修改函数名
+ * @since 2024-07-11 refactor: 修改函数名
+ *        2024-07-10 泛型设置默认类型
  *        2024-07-09 初稿
  * @example
  * ```ts
  * const result = ref('')
- * useLangServeStreamResultCallback<unknown, string>(
+ * useLangServeStreamResultFetch<unknown, string>(
  *   '/api/langserve/xxx',
  *   body,{
  *     onData: (data) => {
@@ -197,7 +198,7 @@ export function useLangServeStreamLogResultFetch<Req>(
  * )
  * ```
  */
-export function useLangServeStreamResultCallback<
+export function useLangServeStreamResultFetch<
   Req = any, RunOutput = any
 >(
   url: NitroFetchRequest,

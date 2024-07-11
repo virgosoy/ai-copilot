@@ -153,6 +153,10 @@ type LangServeReq<
 > = { 
   input: RunInput, config?: CallOptions 
 }
+/**
+ * @template RunInput runnable 的输入，对应 LangServe 请求体的 input 的值类型
+ * @template CallOptions runnable 的配置项，对应 LangServe 请求体的 config 的值类型
+ */
 export type LangServeTransferReq<
   RunInput extends OfetchBody = any, 
   CallOptions extends RunnableConfig = any,
@@ -160,6 +164,22 @@ export type LangServeTransferReq<
   runnableUrl: string,
   runnableMethod: RunnableMethod,
   body: LangServeReq<RunInput, CallOptions>
+}
+
+/**
+ * RunnableConfig 的子类，用泛型方便指定配置项的具体类型
+ * @version 2024-07-11
+ * @since 2024-07-11
+ * @example
+ * ```ts
+ * type ChainConfig = BaseRunnableConfig<{
+ *   "model_provider": "openai" | "anthropic"
+ * }>
+ * // 一般用于传递到需要用到 runnable 配置的地方，如 LangServeTransferReq<unknown, ChainConfig>
+ * ```
+ */
+export interface BaseRunnableConfig<C extends Record<string, any>> extends RunnableConfig {
+  configurable: C
 }
 
 /**

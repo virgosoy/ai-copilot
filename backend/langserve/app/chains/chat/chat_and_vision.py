@@ -78,3 +78,21 @@ chain3 = (
 # ).with_types(
 #     input_type=InputChat
 # )
+
+from langchain_core.runnables.configurable import ConfigurableField
+from langchain_anthropic import ChatAnthropic
+from langchain_community.chat_models import ChatOllama
+import os
+chain4 = (
+    prompt
+    | ChatOpenAI(model="gpt-4-turbo")
+        .configurable_alternatives(
+            ConfigurableField(id="model_provider"),
+            default_key="openai",
+            anthropic=ChatAnthropic(model="claude-3-haiku-20240307"),
+            ollama=ChatOllama(model="qwen2", base_url=os.getenv("OLLAMA_BASE_URL"))
+        )
+    | StrOutputParser()
+).with_types(
+    input_type=InputChat
+)

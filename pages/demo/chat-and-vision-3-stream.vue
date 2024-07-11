@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useLangServeStreamResultCallback } from '~/utils/common';
+import { useLangServeStreamResultFetch } from '~/utils/common';
 
 
 const body = {
@@ -23,7 +23,7 @@ const body = {
 
 const result = ref('')
 function onclick() {
-  useLangServeStreamResultCallback<unknown, string>(
+  useLangServeStreamResultFetch<unknown, string>(
     '/api/langserve/chat-and-vision-3-stream', 
     body,
     {

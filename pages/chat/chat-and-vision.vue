@@ -4,7 +4,7 @@ import LuHumanMessage from '~/components/lu/LuHumanMessage.vue';
 import SyHiddenInputFile from '~/components/sy/SyHiddenInputFile.vue';
 import { useMarkdown } from '~/composables/useMarkdown';
 import { asyncMap } from '~/utils/PromiseUtils';
-import type { Body } from '~/server/api/langserve/chat-and-vision-3-stream-or-log.post';
+import type { Body } from '~/server/api/langserve/chat-and-vision-config-model.post';
 
 const markdown = useMarkdown()
 
@@ -20,8 +20,12 @@ const imagePromptDataUrls = ref<string[]>([])
 const aiResponse = ref('')
 
 import type { RunState, LogEntry } from '@langchain/core/tracers/log_stream'
+import type { UnionToTuple } from '~/server/utils/TsTypeUtils';
 
 const intermediateSteps = ref<Record<string, LogEntry>>()
+
+const modelProviderOptions: UnionToTuple<NonNullable<Body['body']['config']>['configurable']['model_provider']> = ['openai', 'anthropic', 'ollama']
+const modelProvider = ref<typeof modelProviderOptions[number]>(modelProviderOptions[0])
 
 async function sendMessage(){
   messages.value.push(
@@ -33,14 +37,21 @@ async function sendMessage(){
   imagePromptDataUrls.value = []
   prompt.value = ''
 
+  const url = '/api/langserve/chat-and-vision-config-model'
+  const body: Body['body'] = {
+    input: {
+      messages: messages.value
+    },
+    config: {
+      configurable: {
+        model_provider: modelProvider.value
+      },
+    },
+  }
   if(isIntermediateSteps.value){
-    useLangServeStreamLogResultFetch<Body>('/api/langserve/chat-and-vision-3-stream-or-log',{
+    useLangServeStreamLogResultFetch<Body>(url,{
       runnableMethod: 'stream_log',
-      body: {
-        input: {
-          messages: messages.value
-        }
-      }
+      body,
     }, undefined, {
       onData(data) {
         aiResponse.value = data.final_output
@@ -53,15 +64,10 @@ async function sendMessage(){
         intermediateSteps.value = undefined
       }
     })
-
   }else{
-    useLangServeStreamResultCallback<Body>('/api/langserve/chat-and-vision-3-stream-or-log', {
+    useLangServeStreamResultFetch<Body>(url, {
       runnableMethod: 'stream',
-      body: {
-        input: {
-          messages: messages.value
-        }
-      }
+      body,
     },{
       onData(data) {
         aiResponse.value += data
@@ -174,6 +180,7 @@ async function removeImagePromptByIndex(index: number){
               <span class="px-2 text-sm">Attach a file</span>
             </button>
             <LuToggle v-model="isIntermediateSteps">Intermediate steps</LuToggle>
+            <USelectMenu v-model="modelProvider" :options="modelProviderOptions"></USelectMenu>
           </div>
           <button
             type="submit"

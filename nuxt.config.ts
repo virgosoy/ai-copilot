@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     openaiApiKey: process.env.OPENAI_API_KEY,
     openaiBaseUrl: process.env.OPENAI_BASE_URL,
     ollamaBaseUrl: process.env.OLLAMA_BASE_URL,
+    langserveBaseUrl: process.env.LANGSERVE_BASE_URL,
   },
   ui: {
     icons: [
