@@ -1,5 +1,19 @@
 
 <script setup lang="ts">
+/**
+ * 注：dayjs 依赖下列插件
+ * ```ts
+ * // /plugins/dayjs.ts
+ * import dayjs from 'dayjs'
+ * import utc from "dayjs/plugin/utc"
+ * // import relativeDate from "dayjs/plugin/relativeTime"
+ * export default defineNuxtPlugin(nuxtApp => {
+ *   // dayjs.extend(relativeDate)
+ *   dayjs.extend(utc)
+ * })
+ * ```
+ */
+// let _
 import dayjs from 'dayjs'
 import type { LogEntry } from '@langchain/core/tracers/log_stream'
 
