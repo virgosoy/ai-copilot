@@ -3,6 +3,9 @@ import { sseReturnByStream } from "~/server/utils/common";
 // import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { BaseMessageJsonObj } from "~/utils/common";
 
+/**
+ * @deprecated 2024-07-09 使用 chat-and-vision-3-stream-or-log.post.ts
+ */
 export default defineEventHandler(async (event) => {
   
   type ChainInputType = {

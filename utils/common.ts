@@ -132,7 +132,9 @@ import type { RunState } from '@langchain/core/tracers/log_stream'
  * @param url 
  * @param body 
  * @param streamLogResult 
- * @version 2024-07-08
+ * @version 2024-07-11
+ * @since 2024-07-11 新增回调函数，并且 streamLogResult 改为可选，可以传入 undefined。
+ *        2024-07-08
  * @example
  * ```ts
  * import type { RunState } from '@langchain/core/tracers/log_stream'
@@ -147,8 +149,15 @@ import type { RunState } from '@langchain/core/tracers/log_stream'
 export function useLangServeStreamLogResultFetch<Req>(
   url: NitroFetchRequest,
   body: Req,
-  streamLogResult: Ref<RunState | undefined>
+  streamLogResult?: Ref<RunState | undefined>,
+  callback?: {
+    onData?: (data: RunState) => void,
+    onEnd?: () => void,
+  }
 ) {
+  if(!streamLogResult){
+    streamLogResult = ref<RunState>()
+  }
   const sse = useSseClient<
     {'data': { ops: Operation[]}, 'end': undefined}
   >(url, {
@@ -157,6 +166,9 @@ export function useLangServeStreamLogResultFetch<Req>(
     receiveHandlers: [({event, data}) => {
       if(event === 'data') {
         streamLogResult.value = jsonpatch.applyPatch(streamLogResult.value, data.ops, true, false).newDocument
+        callback?.onData?.(streamLogResult.value!)
+      }else if(event === 'end') {
+        callback?.onEnd?.()
       }
     }],
   })
@@ -169,7 +181,9 @@ export function useLangServeStreamLogResultFetch<Req>(
  * @param body 
  * @param [callback.onData]
  * @param [callback.onEnd]
- * @version 2024-07-09
+ * @version 2024-07-10
+ * @since 2024-07-10 泛型设置默认类型
+ *        2024-07-09 初稿
  * @example
  * ```ts
  * const result = ref('')
@@ -183,7 +197,9 @@ export function useLangServeStreamLogResultFetch<Req>(
  * )
  * ```
  */
-export function useLangServeStreamResultCallback<Req, RunOutput>(
+export function useLangServeStreamResultCallback<
+  Req = any, RunOutput = any
+>(
   url: NitroFetchRequest,
   body: Req,
   callback?: {
