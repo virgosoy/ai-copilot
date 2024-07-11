@@ -36,7 +36,7 @@ function showIntermediateSteps(){
   <div class="flex items-start">
     <img
       class="mr-2 h-8 w-8 rounded-full"
-      src="https://dummyimage.com/128x128/354ea1/ffffff&text=G"
+      src="https://dummyimage.com/128x128/354ea1/ffffff&text=A"
     />
 
     <div
