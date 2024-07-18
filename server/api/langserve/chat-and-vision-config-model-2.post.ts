@@ -15,9 +15,6 @@ export type Body = Omit<
   LangServeTransferReq<ChainInputType, ChainConfig>,
 'runnableUrl'>
 
-/**
- * @deprecated 使用 chat-and-vision-config-model-2.post.ts
- */
 export default defineEventHandler<{body: Body}>(async (event) => {
 
   // 请求体
@@ -25,6 +22,6 @@ export default defineEventHandler<{body: Body}>(async (event) => {
 
   const t = useLangServeTransfer(event)
   return t.fetch<ChainInputType, string, ChainConfig>(
-    'chat-and-vision-config-model', body.runnableMethod, body.body
+    'chat-and-vision-config-model-2', body.runnableMethod, body.body
   )
 })

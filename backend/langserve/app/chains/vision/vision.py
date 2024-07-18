@@ -7,7 +7,7 @@ from langchain_community.document_loaders.parsers.pdf import PDFMinerParser
 from langchain_core.document_loaders import Blob
 from langchain_core.runnables import RunnableLambda, RunnableSequence
 
-from langchain_community.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langserve import CustomUserType
 
 from ...util.message import img_message

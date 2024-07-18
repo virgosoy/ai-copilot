@@ -3,7 +3,8 @@ from langchain.pydantic_v1 import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 # from langchain_community.chat_models import ChatAnthropic
-from langchain_community.chat_models import ChatOpenAI
+# from langchain_community.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 
 # Declare a chain
 prompt = ChatPromptTemplate.from_messages(

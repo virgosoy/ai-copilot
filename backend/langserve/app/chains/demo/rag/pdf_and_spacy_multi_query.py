@@ -23,7 +23,8 @@ vectorstore = Chroma(persist_directory=persist_directory,
 retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 4})
 
 from langchain.retrievers.multi_query import MultiQueryRetriever
-from langchain_community.chat_models.openai import ChatOpenAI
+# from langchain_community.chat_models.openai import ChatOpenAI
+from langchain_openai import ChatOpenAI
 
 multi_query_retriever = MultiQueryRetriever.from_llm(
     retriever=retriever,

@@ -25,7 +25,7 @@ def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 from langchain_core.runnables import RunnablePassthrough
-from langchain_openai.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 
 chain = (

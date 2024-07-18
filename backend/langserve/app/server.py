@@ -94,11 +94,12 @@ add_routes(
     playground_type="chat",
 )
 
-from .chains.chat.chat_and_vision import chain1, chain2, chain3, chain4
+from .chains.chat.chat_and_vision import chain1, chain2, chain3, chain4, chain5
 add_routes(app, chain1, path="/chat-and-vision-1")
 add_routes(app, chain2, path="/chat-and-vision-2")
 add_routes(app, chain3, path="/chat-and-vision-3")
 add_routes(app, chain4, path="/chat-and-vision-config-model")
+add_routes(app, chain5, path="/chat-and-vision-config-model-2")
 
 from .chains.rag.local_knowledge_rag import chain_text, chain_test_2, chain_vision, chain_chat_and_vision
 add_routes(app, chain_text, path="/local-knowledge-rag-text")

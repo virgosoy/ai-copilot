@@ -8,7 +8,7 @@ import { RunnablePassthrough, RunnableSequence } from '@langchain/core/runnables
 import { formatDocumentsAsString } from 'langchain/util/document'
 import { StringOutputParser } from '@langchain/core/output_parsers'
 import { ScoreThresholdRetriever } from "langchain/retrievers/score_threshold"
-import { AIMessage, BaseMessage, HumanMessage, coerceMessageLikeToMessage } from "langchain/schema"
+import { AIMessage, BaseMessage, HumanMessage, coerceMessageLikeToMessage } from "@langchain/core/messages"
 import { Calculator } from "langchain/tools/calculator"
 import { WebBrowser } from "langchain/tools/webbrowser";
 import { createBaiduWebSearchTool, createPuppeteerWebTool } from "~/server/utils/langchain-tools"

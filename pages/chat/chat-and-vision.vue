@@ -27,6 +27,27 @@ const intermediateSteps = ref<Record<string, LogEntry>>()
 const modelProviderOptions: UnionToTuple<NonNullable<Body['body']['config']>['configurable']['model_provider']> = ['openai', 'anthropic', 'ollama']
 const modelProvider = ref<typeof modelProviderOptions[number]>(modelProviderOptions[0])
 
+const modelProviderMapModel : Record<NonNullable<Body['body']['config']>['configurable']['model_provider'], string[]> = {
+  openai: ['gpt-4-turbo', 'gpt-4o', 'gpt-3.5-turbo'],
+  anthropic: ['claude-3-haiku-20240307'],
+  ollama: ['qwen2', 'qwen2:72B'],
+}
+const modelOptions = computed(() => {
+  return modelProviderMapModel[modelProvider.value]
+})
+const model = ref<string>()
+watchEffect(() => {
+  model.value = modelProviderMapModel[modelProvider.value][0]
+})
+const modelConfig = computed(() => {
+  // 没选择的模型供应商对应的参数用不到，所以无所谓，下面可以设置重复。
+  return {
+    'openai_model': model.value,
+    'anthropic_model': model.value,
+    'ollama_model': model.value,
+  }
+})
+
 async function sendMessage(){
   messages.value.push(
     createImgMessage(
@@ -37,14 +58,15 @@ async function sendMessage(){
   imagePromptDataUrls.value = []
   prompt.value = ''
 
-  const url = '/api/langserve/chat-and-vision-config-model'
+  const url = '/api/langserve/chat-and-vision-config-model-2'
   const body: Body['body'] = {
     input: {
       messages: messages.value
     },
     config: {
       configurable: {
-        model_provider: modelProvider.value
+        model_provider: modelProvider.value,
+        ...modelConfig.value
       },
     },
   }
@@ -181,6 +203,7 @@ async function removeImagePromptByIndex(index: number){
             </button>
             <LuToggle v-model="isIntermediateSteps">Intermediate steps</LuToggle>
             <USelectMenu v-model="modelProvider" :options="modelProviderOptions"></USelectMenu>
+            <USelectMenu v-model="model" :options="modelOptions"></USelectMenu>
           </div>
           <button
             type="submit"
