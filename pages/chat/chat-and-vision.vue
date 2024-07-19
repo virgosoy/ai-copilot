@@ -21,32 +21,11 @@ const aiResponse = ref('')
 
 import type { RunState, LogEntry } from '@langchain/core/tracers/log_stream'
 import type { UnionToTuple } from '~/server/utils/TsTypeUtils';
+import BizConfigModelSelect from '~/components/biz/BizConfigModelSelect.vue';
 
 const intermediateSteps = ref<Record<string, LogEntry>>()
 
-const modelProviderOptions: UnionToTuple<NonNullable<Body['body']['config']>['configurable']['model_provider']> = ['openai', 'anthropic', 'ollama']
-const modelProvider = ref<typeof modelProviderOptions[number]>(modelProviderOptions[0])
-
-const modelProviderMapModel : Record<NonNullable<Body['body']['config']>['configurable']['model_provider'], string[]> = {
-  openai: ['gpt-4-turbo', 'gpt-4o', 'gpt-3.5-turbo'],
-  anthropic: ['claude-3-haiku-20240307'],
-  ollama: ['qwen2', 'qwen2:72B'],
-}
-const modelOptions = computed(() => {
-  return modelProviderMapModel[modelProvider.value]
-})
-const model = ref<string>()
-watchEffect(() => {
-  model.value = modelProviderMapModel[modelProvider.value][0]
-})
-const modelConfig = computed(() => {
-  // 没选择的模型供应商对应的参数用不到，所以无所谓，下面可以设置重复。
-  return {
-    'openai_model': model.value,
-    'anthropic_model': model.value,
-    'ollama_model': model.value,
-  }
-})
+const modelConfig = ref<any>({})
 
 async function sendMessage(){
   messages.value.push(
@@ -65,7 +44,6 @@ async function sendMessage(){
     },
     config: {
       configurable: {
-        model_provider: modelProvider.value,
         ...modelConfig.value
       },
     },
@@ -202,8 +180,7 @@ async function removeImagePromptByIndex(index: number){
               <span class="px-2 text-sm">Attach a file</span>
             </button>
             <LuToggle v-model="isIntermediateSteps">Intermediate steps</LuToggle>
-            <USelectMenu v-model="modelProvider" :options="modelProviderOptions"></USelectMenu>
-            <USelectMenu v-model="model" :options="modelOptions"></USelectMenu>
+            <BizConfigModelSelect v-model="modelConfig"></BizConfigModelSelect>
           </div>
           <button
             type="submit"
