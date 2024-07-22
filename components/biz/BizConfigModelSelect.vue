@@ -2,6 +2,7 @@
 /**
  * @example
  * LangServe 写法：
+ * （注：可以结合后端的 from utils.model import biz_configurable_model 方法使用。
  * ```python
  * # 具体模型名称的配置 key 为模型供应商配置值 + '_model'
  * chain = Chat1(model="my_default_model")
@@ -27,10 +28,13 @@
  *             ),
  *     )
  * ```
+ * 
+ * 
  * 前端使用：
  * ```ts
  * const modelConfig = ref({})
  * 
+ * // 发起请求时
  * $fetch('runnable-url', {
  *   body: {
  *     config: {

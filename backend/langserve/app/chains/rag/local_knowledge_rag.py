@@ -150,6 +150,8 @@ prompt_text_chat = ChatPromptTemplate.from_messages([
 
 from ...util.message import get_message_string_content
 
+from ...util.model import biz_configurable_model
+
 chain_text_chat = (
     {
         "context": 
@@ -159,7 +161,7 @@ chain_text_chat = (
         "messages": lambda x: x.messages
     }
     | prompt_text_chat
-    | model
+    | biz_configurable_model()
     | StrOutputParser()
 ).with_types(input_type=ChatReq)
 

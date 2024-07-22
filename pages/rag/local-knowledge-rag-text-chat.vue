@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BizConfigModelSelect from '~/components/biz/BizConfigModelSelect.vue';
 import LuAiMessage from '~/components/lu/LuAiMessage.vue';
 import LuHumanMessage from '~/components/lu/LuHumanMessage.vue';
 import SyHiddenInputFile from '~/components/sy/SyHiddenInputFile.vue';
@@ -14,6 +15,8 @@ const fileComp = ref<InstanceType<typeof SyHiddenInputFile>>()
 const prompt = ref('')
 const imagePromptDataUrls = ref<string[]>([])
 const aiResponse = ref('')
+
+const modelConfig = ref({})
 
 const {
   isIntermediateSteps, 
@@ -33,6 +36,11 @@ async function sendMessage(){
 
   fetchLangServeResult('/api/langserve/local-knowledge-rag-text-chat', {
     input: {messages: messages.value},
+    config: {
+      configurable: {
+        ...modelConfig.value,
+      }
+    }
   }, {
     onData({isIntermediateSteps, data, finalOutput}) {
       aiResponse.value = isIntermediateSteps ? finalOutput : (aiResponse.value + data)
@@ -121,31 +129,34 @@ async function removeImagePromptByIndex(index: number){
           ></textarea>
         </div>
         <div class="flex items-center justify-between px-2 py-2">
-          <!-- <SyHiddenInputFile ref="fileComp" @fileSelect="handleFileSelected" />
-          <button
-            type="button"
-            class="inline-flex cursor-pointer justify-center rounded-lg p-2 text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-600 dark:hover:text-slate-50"
-            @click="handleAttachFile"
-          >
-            <span class="sr-only">Attach file</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-              stroke="currentColor"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+          <div class="flex flex-row items-center">
+            <!-- <SyHiddenInputFile ref="fileComp" @fileSelect="handleFileSelected" />
+            <button
+              type="button"
+              class="inline-flex cursor-pointer justify-center rounded-lg p-2 text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-600 dark:hover:text-slate-50"
+              @click="handleAttachFile"
             >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-              <path
-                d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5"
-              ></path>
-            </svg>
-            <span class="px-2 text-sm">Attach a file</span>
-          </button> -->
-          <LuToggle v-model="isIntermediateSteps">Intermediate steps</LuToggle>
+              <span class="sr-only">Attach file</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path
+                  d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5"
+                ></path>
+              </svg>
+              <span class="px-2 text-sm">Attach a file</span>
+            </button> -->
+            <LuToggle v-model="isIntermediateSteps">Intermediate steps</LuToggle>
+            <BizConfigModelSelect v-model="modelConfig"></BizConfigModelSelect>
+          </div>
           <button
             type="submit"
             class="mr-1 inline-flex items-center gap-x-2 rounded-lg bg-blue-600 px-4 py-2.5 text-center text-sm font-medium text-slate-50 hover:bg-blue-800 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 sm:text-base"
