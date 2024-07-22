@@ -4,7 +4,6 @@ import LuHumanMessage from '~/components/lu/LuHumanMessage.vue';
 import SyHiddenInputFile from '~/components/sy/SyHiddenInputFile.vue';
 import { useMarkdown } from '~/composables/useMarkdown';
 import { asyncMap } from '~/utils/PromiseUtils';
-import type { Body } from '~/server/api/langserve/chat-and-vision-config-model.post';
 
 const markdown = useMarkdown()
 
@@ -16,11 +15,6 @@ const prompt = ref('')
 const imagePromptDataUrls = ref<string[]>([])
 const aiResponse = ref('')
 
-import type { RunState, LogEntry } from '@langchain/core/tracers/log_stream'
-import type { UnionToTuple } from '~/server/utils/TsTypeUtils';
-import BizConfigModelSelect from '~/components/biz/BizConfigModelSelect.vue';
-import { useBizIntermediteStep } from '~/composables/useBizIntermediteStep';
-
 const {
   isIntermediateSteps, 
   intermediateSteps, 
@@ -28,38 +22,26 @@ const {
   fetchLangServeResult,
 } = useBizIntermediteStep()
 
-const modelConfig = ref<any>({})
-
 async function sendMessage(){
-  messages.value.push(
-    createImgMessage(
-      imagePromptDataUrls.value.map(du => getBase64FromDataUrl(du)),
-      prompt.value
-    )
+  const currentMessage = createImgMessage(
+    imagePromptDataUrls.value.map(du => getBase64FromDataUrl(du)),
+    prompt.value
   )
+  messages.value.push(currentMessage)
   imagePromptDataUrls.value = []
   prompt.value = ''
 
-  const url = '/api/langserve/chat-and-vision-config-model-2'
-  const body: Body['body'] = {
-    input: {
-      messages: messages.value
-    },
-    config: {
-      configurable: {
-        ...modelConfig.value
-      },
-    },
-  }
-  fetchLangServeResult(url, body, {
+  fetchLangServeResult('/api/langserve/local-knowledge-rag-text-chat', {
+    input: {messages: messages.value},
+  }, {
     onData({isIntermediateSteps, data, finalOutput}) {
       aiResponse.value = isIntermediateSteps ? finalOutput : (aiResponse.value + data)
     },
-    onEnd(){
+    onEnd() {
       messages.value.push(createAIMessage(aiResponse.value))
       aiResponse.value = ''
       return {currentMessageIndex: messages.value.length - 1}
-    }
+    },
   })
 }
 
@@ -73,7 +55,6 @@ async function handleFileSelected({files} : {event: Event, files: FileList}){
 async function removeImagePromptByIndex(index: number){
   imagePromptDataUrls.value.splice(index, 1)
 }
-
 </script>
 
 <template>
@@ -84,7 +65,8 @@ async function removeImagePromptByIndex(index: number){
       class="flex-1 space-y-6 overflow-y-auto rounded-xl bg-slate-200 p-4 text-sm leading-6 text-slate-900 shadow-sm dark:bg-slate-900 dark:text-slate-300 sm:text-base sm:leading-7"
     >
       <LuHistoryMessages :messages="messages" :intermediateStepsOfMessages="intermediateStepsOfMessages"></LuHistoryMessages>
-      <LuAiMessage v-if="aiResponse" :intermediateSteps="intermediateSteps">
+      <LuAiMessage v-if="aiResponse" 
+          :intermediateSteps="intermediateSteps">
         <!-- <p>{{ aiResponse }}</p> -->
         <div v-html="markdown.render(aiResponse)"></div>
       </LuAiMessage>
@@ -92,6 +74,10 @@ async function removeImagePromptByIndex(index: number){
         <img v-for="du in imagePromptDataUrls" :src="du"/>
         <div v-html="markdown.render(prompt)"></div>
       </LuHumanMessage>
+      <!-- <LuAiMessage>
+        <!== <p>{{ aiResponse }}</p> ==>
+        <div v-html="markdown.render(aiResponse)"></div>
+      </LuAiMessage> -->
     </div>
     <!-- file panel above input -->
     <div
@@ -135,35 +121,31 @@ async function removeImagePromptByIndex(index: number){
           ></textarea>
         </div>
         <div class="flex items-center justify-between px-2 py-2">
-          <div class="flex flex-row items-center">
-            <!-- upload -->
-            <SyHiddenInputFile ref="fileComp" @fileSelect="handleFileSelected" />
-            <button
-              type="button"
-              class="inline-flex cursor-pointer justify-center rounded-lg p-2 text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-600 dark:hover:text-slate-50"
-              @click="handleAttachFile"
+          <!-- <SyHiddenInputFile ref="fileComp" @fileSelect="handleFileSelected" />
+          <button
+            type="button"
+            class="inline-flex cursor-pointer justify-center rounded-lg p-2 text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-600 dark:hover:text-slate-50"
+            @click="handleAttachFile"
+          >
+            <span class="sr-only">Attach file</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
-              <span class="sr-only">Attach file</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <path
-                  d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5"
-                ></path>
-              </svg>
-              <span class="px-2 text-sm">Attach a file</span>
-            </button>
-            <LuToggle v-model="isIntermediateSteps">Intermediate steps</LuToggle>
-            <BizConfigModelSelect v-model="modelConfig"></BizConfigModelSelect>
-          </div>
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path
+                d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5"
+              ></path>
+            </svg>
+            <span class="px-2 text-sm">Attach a file</span>
+          </button> -->
+          <LuToggle v-model="isIntermediateSteps">Intermediate steps</LuToggle>
           <button
             type="submit"
             class="mr-1 inline-flex items-center gap-x-2 rounded-lg bg-blue-600 px-4 py-2.5 text-center text-sm font-medium text-slate-50 hover:bg-blue-800 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 sm:text-base"

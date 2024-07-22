@@ -10,6 +10,7 @@ def img_message(base64_images: list[str], text: str):
     :param base64_images: 图像列表。
     :param text: 文本提示。
     :return: 包含每个图像和文本提示的消息对象列表。
+    :@author: doc-snippet
     @version 
         240624 返回值修改为单个对象
         240603
@@ -29,3 +30,23 @@ def img_message(base64_images: list[str], text: str):
             messages.append(image_message)
     return HumanMessage(content=messages)
 
+def get_message_string_content(message: HumanMessage) -> str:
+    """
+    将消息转换为字符串。
+
+    :param message: 消息对象。
+    :return: 消息内容的字符串表示形式。
+    
+    @version 2024-07-22
+    """
+    if isinstance(message.content, str):
+        return message.content
+    elif isinstance(message.content, list):
+        result = []
+        for item in message.content:
+            if isinstance(item, str):
+                result.append(item)
+            if isinstance(item, dict) and "text" in item:
+                result.append(item["text"])
+        return "\n".join(result)
+    return ''

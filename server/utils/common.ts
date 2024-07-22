@@ -189,6 +189,7 @@ export interface BaseRunnableConfig<C extends Record<string, any>> extends Runna
  * @version 2024-07-10
  * @since 2024-07-08
  * @example
+ * 前端发送的是 Runnable 的输入：
  * ```ts
  * type ChainInputType = {
  *   messages: string
@@ -199,6 +200,27 @@ export interface BaseRunnableConfig<C extends Record<string, any>> extends Runna
  * return t.fetch<ChainInputType, string>('my-runnable', 'stream_log', {
  *   input: body
  * })
+ * ```
+ * 前端直接发送 Runnable 请求方法、输入、配置：
+ * ```ts
+ * type ChainInputType = {
+ *   messages: string
+ * }
+ * // 业务：模型供应商选择
+ * type ChainConfig = BaseRunnableConfig<{
+ *   "model_provider": "openai" | "anthropic" | "ollama"
+ * }>
+ * type Req = LangServeTransferReq<ChainInputType, ChainConfig>
+ * // 请求体
+ * const req = await readBody<Req>(event)
+ * const t = useLangServeTransfer(event)
+ * return t.fetch<ChainInputType, string>('my-runnable', req.runnableMethod, req.body)
+ * ```
+ * 上例无视输入与配置类型时，最简化写法：
+ * ```ts
+ * const req = await readBody<LangServeTransferReq>(event)
+ * const t = useLangServeTransfer(event)
+ * return t.fetch('my-runnable', req.runnableMethod, req.body)
  * ```
  */
 export function useLangServeTransfer(event: H3Event) {

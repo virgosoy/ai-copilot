@@ -135,6 +135,35 @@ chain_chat_and_vision = (
 ).with_types(input_type=ChatAndVisionReq)
 
 
+class ChatReq(CustomUserType):
+    messages: list[HumanMessage | AIMessage | SystemMessage] = Field(
+        ...,
+        description="The chat messages representing the current conversation.",
+    )
+
+
+prompt_text_chat = ChatPromptTemplate.from_messages([
+    ('system', '你是问答任务的助手。使用以下检索到的上下文来回答问题。如果你不知道答案，就说你不知道。最多使用三个句子并保持答案简洁。'),
+    ('system', '上下文: {context}'),
+    MessagesPlaceholder(variable_name="messages"),
+])
+
+from ...util.message import get_message_string_content
+
+chain_text_chat = (
+    {
+        "context": 
+            (lambda x: get_message_string_content(x.messages[-1])) 
+            | retriever 
+            | format_docs, 
+        "messages": lambda x: x.messages
+    }
+    | prompt_text_chat
+    | model
+    | StrOutputParser()
+).with_types(input_type=ChatReq)
+
+
 # chain_chat_and_vision = (
 #     RunnableLambda(
 #         lambda x: x

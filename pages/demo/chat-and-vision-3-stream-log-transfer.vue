@@ -29,6 +29,11 @@ function onclick() {
     result,
   )
 }
+
+watchEffect(() => {
+  console.log('result', result.value)
+})
+
 </script>
 
 <template>
@@ -41,6 +46,7 @@ function onclick() {
         <div>{{ log.final_output }}</div>
       </div>
     </div>
+    <br>
     {{ result }}
   </div>
 </template>

@@ -101,11 +101,12 @@ add_routes(app, chain3, path="/chat-and-vision-3")
 add_routes(app, chain4, path="/chat-and-vision-config-model")
 add_routes(app, chain5, path="/chat-and-vision-config-model-2")
 
-from .chains.rag.local_knowledge_rag import chain_text, chain_test_2, chain_vision, chain_chat_and_vision
+from .chains.rag.local_knowledge_rag import chain_text, chain_test_2, chain_vision, chain_chat_and_vision, chain_text_chat
 add_routes(app, chain_text, path="/local-knowledge-rag-text")
 add_routes(app, chain_test_2, path="/local-knowledge-rag-test-2")
 add_routes(app, chain_vision, path="/local-knowledge-rag-vision")
 add_routes(app, chain_chat_and_vision, path="/local-knowledge-rag-chat-and-vision")
+add_routes(app, chain_text_chat, path="/local-knowledge-rag-text-chat")
 
 # from .chains.demo.configure import chain, chain1, chain2
 # add_routes(app, chain, path="/configure")
