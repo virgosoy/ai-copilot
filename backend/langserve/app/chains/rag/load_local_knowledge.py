@@ -7,6 +7,9 @@ from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings.openai import OpenAIEmbeddings
 
 def init():
+    load_local_knowledge_use_ollama()
+    
+def load_local_knowledge_use_openai():
     local_rag_knowledge_path = os.getenv("LOCAL_RAG_KNOWLEDGE_PATH")
     loader = PyPDFDirectoryLoader(local_rag_knowledge_path,
                                   extract_images=True)
@@ -21,9 +24,26 @@ def init():
         embedding=OpenAIEmbeddings(), 
         persist_directory=persist_directory)
 
+from langchain_community.embeddings.ollama import OllamaEmbeddings
 
+def load_local_knowledge_use_ollama():
+    local_rag_knowledge_path = os.getenv("LOCAL_RAG_KNOWLEDGE_PATH")
+    loader = PyPDFDirectoryLoader(local_rag_knowledge_path,
+                                  extract_images=True)
+    docs = loader.load()
+    
+    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=200)
+    splits = splitter.split_documents(docs)
+    
+    persist_directory = os.getenv("LOCAL_RAG_KNOWLEDGE_USE_OLLAMA_CHROMA_DB_PATH")
+    Chroma.from_documents(
+        documents=splits, 
+        embedding=OllamaEmbeddings(model="mxbai-embed-large", base_url=os.getenv("OLLAMA_BASE_URL")), 
+        persist_directory=persist_directory)
 
 if __name__ == "__main__":
+    # 运行这个的时候 pwd 要在 /backend/langserve
+    # 然后 vscode 右上角 Run Python File 即可。
     import dotenv
     dotenv.load_dotenv('../../.env')
     init()

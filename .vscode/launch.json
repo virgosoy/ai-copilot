@@ -5,6 +5,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      // 本地运行 python 文件 main 方法用，方便指定 PWD 调试
+      // py 文件右上角选择 Python Debugger: Debug Python File 之后选择这个配置即可
+      "name": "Python Debugger: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/backend/langserve"
+    },
+    {
       "name": "Python Debugger: FastAPI",
       "type": "debugpy",
       "request": "launch",
