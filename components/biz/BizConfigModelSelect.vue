@@ -1,5 +1,6 @@
 <script setup lang="ts">
 /**
+ * 📌注：如果有新增模型，可以更新 modelProviderMapModel
  * @example
  * LangServe 写法：
  * （注：可以结合后端的 from utils.model import biz_configurable_model 方法使用。
@@ -75,7 +76,7 @@ const modelProvider = computed({
 const modelProviderMapModel : Record<typeof modelProviderOptions[number], string[]> = {
   openai: ['gpt-4-turbo', 'gpt-4o', 'gpt-3.5-turbo'],
   anthropic: ['claude-3-haiku-20240307'],
-  ollama: ['qwen2', 'qwen2:72B'],
+  ollama: ['qwen2', 'qwen2:72B', 'llama3'],
 }
 const modelOptions = computed(() => {
   return modelProviderMapModel[modelProvider.value]
