@@ -24,6 +24,13 @@ vectorstore = Chroma(persist_directory=persist_directory,
 
 retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 6})
 
+from langchain_community.embeddings.ollama import OllamaEmbeddings
+ollama_persist_directory=os.getenv("LOCAL_RAG_KNOWLEDGE_USE_OLLAMA_CHROMA_DB_PATH")
+ollama_vectorstore = Chroma(persist_directory=ollama_persist_directory, 
+                     embedding_function=OllamaEmbeddings(model="mxbai-embed-large", base_url=os.getenv("OLLAMA_BASE_URL")))
+ollama_retriever = ollama_vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 4})
+
+
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
@@ -157,6 +164,19 @@ chain_text_chat = (
         "context": 
             (lambda x: get_message_string_content(x.messages[-1])) 
             | retriever 
+            | format_docs, 
+        "messages": lambda x: x.messages
+    }
+    | prompt_text_chat
+    | biz_configurable_model()
+    | StrOutputParser()
+).with_types(input_type=ChatReq)
+
+chain_local_text_chat = (
+    {
+        "context": 
+            (lambda x: get_message_string_content(x.messages[-1])) 
+            | ollama_retriever 
             | format_docs, 
         "messages": lambda x: x.messages
     }

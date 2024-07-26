@@ -165,6 +165,48 @@ export type LangServeTransferReq<
   runnableMethod: RunnableMethod,
   body: LangServeReq<RunInput, CallOptions>
 }
+/**
+ * 用于前端传入 LangServe 的请求方法和请求体
+ * 实际上就是忽略 runnableUrl 的 LangServeTransferReq
+ * @template RunInput runnable 的输入，对应 LangServe 请求体的 input 的值类型
+ * @template CallOptions runnable 的配置项，对应 LangServe 请求体的 config 的值类型
+ * @example
+ * 后端：
+ * ```ts
+ * import type { LangServeOfNuxtApiReq } from "~/server/utils/common";
+ * 
+ * // 指定泛型（按需）
+ * type ChainInput = BaseMessageJsonObj[]
+ * type ChainConfig = BaseRunnableConfig<{
+ *   "model_provider": "openai" | "anthropic"
+ * }>
+ * 
+ * export default defineEventHandler(async (event) => {
+ *   // ★ 用处
+ *   // 指定泛型时（按需）
+ *   const req = await readBody<LangServeOfNuxtApiReq<ChainInput, ChainConfig>>(event)
+ *   // 或者不需要泛型
+ *   const req = await readBody<LangServeOfNuxtApiReq>(event)
+ * 
+ *   const t = useLangServeTransfer(event)
+ *   return t.fetch('my-runnable', req.runnableMethod, req.body)
+ * })
+ * ```
+ * 前端一般是结合 useBizIntermediteStep 的 fetchLangServeResult 使用，
+ * 底层会传递 LangServeOfNuxtApiReq 给后端
+ * ```ts
+ * // 一般需要具体类型提示时才用，且指定泛型。
+ * // 如果不指定泛型的话，那和不指定类型没区别。
+ * const body: LangServeOfNuxtApiReq<ChainInput, ChainConfig>['body']
+ * // 其实 body 也是 LangServe 的请求体，但是此类型目前没 export
+ * // const body: LangServeReq<RunInput, CallOptions>
+ * fetchLangServeResult('/api/langserve/my-runnable', body, ...)
+ * ```
+ */
+export type LangServeOfNuxtApiReq<
+  RunInput extends OfetchBody = any, 
+  CallOptions extends RunnableConfig = any,
+> = Omit<LangServeTransferReq<RunInput, CallOptions>, 'runnableUrl'>
 
 /**
  * RunnableConfig 的子类，用泛型方便指定配置项的具体类型
