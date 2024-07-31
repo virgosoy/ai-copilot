@@ -2,8 +2,15 @@
 
 Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
-## Setup
+## 安装 Setup
 
+建议使用 pnpm
+```bash
+# pnpm 安装：
+npm install -g pnpm
+```
+
+安装项目所有依赖项
 Make sure to install the dependencies:
 
 ```bash
@@ -11,7 +18,7 @@ Make sure to install the dependencies:
 npm install
 
 # pnpm
-pnpm install
+pnpm install # 或 pnpm i
 
 # yarn
 yarn install
@@ -19,6 +26,10 @@ yarn install
 # bun
 bun install
 ```
+
+## VSCode Server Debug
+
+Debug 中运行 server: nuxt 配置即可。
 
 ## Development Server
 
