@@ -43,6 +43,7 @@ def load_local_knowledge_use_ollama():
 
 def load_local_knowledge_uni():
     _load_local_knowledge_uni('ebs', 'ebs')
+    # _load_local_knowledge_uni('test', 'test')
 
 def _load_local_knowledge_uni(relative_folder_path: str, collection_name: str):
     """
