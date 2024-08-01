@@ -66,8 +66,8 @@ def _load_local_knowledge_uni(relative_folder_path: str, collection_name: str):
         persist_directory=persist_directory)
 
 if __name__ == "__main__":
-    # 运行这个的时候 pwd 要在 /backend/langserve
-    # 然后 vscode 右上角 Run Python File 即可。
+    # 运行这个的时候 pwd 要在 /backend/langserve，然后 vscode 右上角 Run Python File 即可。
+    # debug 则直接选择 Python Debugger: Debug using launch.json 即可
     import dotenv
     dotenv.load_dotenv('../../.env')
     init()
