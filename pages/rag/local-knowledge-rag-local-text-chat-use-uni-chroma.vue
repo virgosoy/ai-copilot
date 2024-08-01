@@ -68,7 +68,7 @@ async function removeImagePromptByIndex(index: number){
 }
 
 const collectionName = ref()
-const collectionNameOptions = ['ebs']
+const collectionNameOptions = ['ebs', 'it-infrastructure-maintenance']
 
 </script>
 

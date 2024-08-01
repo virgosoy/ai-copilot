@@ -42,6 +42,7 @@ def load_local_knowledge_use_ollama():
         persist_directory=persist_directory)
 
 def load_local_knowledge_uni():
+    _load_local_knowledge_uni('it', 'it-infrastructure-maintenance')
     _load_local_knowledge_uni('ebs', 'ebs')
     # _load_local_knowledge_uni('test', 'test')
 
