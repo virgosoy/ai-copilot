@@ -1,5 +1,6 @@
 
 
+from typing import Optional
 from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 
@@ -29,6 +30,14 @@ ollama_persist_directory=os.getenv("LOCAL_RAG_KNOWLEDGE_USE_OLLAMA_CHROMA_DB_PAT
 ollama_vectorstore = Chroma(persist_directory=ollama_persist_directory, 
                      embedding_function=OllamaEmbeddings(model="mxbai-embed-large", base_url=os.getenv("OLLAMA_BASE_URL")))
 ollama_retriever = ollama_vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 4})
+
+uni_persist_directory=os.getenv("LOCAL_RAG_KNOWLEDGE_UNI_CHROMA_DB_PATH")
+def create_uni_vectorstore(collection_name: str):
+    return Chroma(persist_directory=uni_persist_directory, 
+                    collection_name=collection_name,
+                    embedding_function=OllamaEmbeddings(model="mxbai-embed-large", base_url=os.getenv("OLLAMA_BASE_URL")))
+def create_uni_retriever(collection_name: str):
+    return create_uni_vectorstore(collection_name).as_retriever(search_type="similarity", search_kwargs={"k": 4})
 
 
 def format_docs(docs):
@@ -184,6 +193,35 @@ chain_local_text_chat = (
     | biz_configurable_model()
     | StrOutputParser()
 ).with_types(input_type=ChatReq)
+
+
+class ConfigVectorCollectionNameReq(BaseModel):
+    collectionName: str = Field("langchain")
+
+class ChatAndConfigVectorCollectionNameReq(ChatReq, ConfigVectorCollectionNameReq):
+    pass
+
+# from langchain_core.runnables import RunnableSerializable, RunnableBinding, ConfigurableField
+
+from langchain_core.runnables import RunnableSequence, RunnablePassthrough, RunnableParallel
+
+# from langchain_core.runnables.config import RunnableConfig
+# from langchain_core.runnables.configurable import RunnableConfigurableFields
+# from langchain_core.runnables.history import RunnableWithMessageHistory
+chain_local_text_chat_use_uni_chroma = (
+    # RunnableLambda(lambda x: x)
+    {
+        "context": RunnableSequence(
+            lambda x: create_uni_retriever(x.collectionName).invoke(get_message_string_content(x.messages[-1])),
+            format_docs
+        ),
+        "messages": lambda x: x.messages
+    }
+    # | RunnableLambda(lambda x: x)
+    | prompt_text_chat
+    | biz_configurable_model()
+    | StrOutputParser()
+).with_types(input_type=ChatAndConfigVectorCollectionNameReq)
 
 
 # chain_chat_and_vision = (
