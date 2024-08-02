@@ -67,8 +67,16 @@ async function removeImagePromptByIndex(index: number){
   imagePromptDataUrls.value.splice(index, 1)
 }
 
+
+
 const collectionName = ref()
 const collectionNameOptions = ['ebs', 'it-infrastructure-maintenance']
+
+
+
+function clearChatHistory(){
+  messages.value = []
+}
 
 </script>
 
@@ -167,6 +175,7 @@ const collectionNameOptions = ['ebs', 'it-infrastructure-maintenance']
               <span class="ml-3 pr-1 text-sm font-medium text-slate-800 dark:text-slate-200">knowledge: </span>
               <USelectMenu v-model="collectionName" :options="collectionNameOptions"></USelectMenu>
             </div>
+            <UButton class="ml-3" color="red" @click="clearChatHistory">Clear Chat History</UButton>
           </div>
           <button
             type="submit"

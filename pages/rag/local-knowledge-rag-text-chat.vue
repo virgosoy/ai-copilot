@@ -63,6 +63,12 @@ async function handleFileSelected({files} : {event: Event, files: FileList}){
 async function removeImagePromptByIndex(index: number){
   imagePromptDataUrls.value.splice(index, 1)
 }
+
+
+
+function clearChatHistory(){
+  messages.value = []
+}
 </script>
 
 <template>
@@ -156,6 +162,7 @@ async function removeImagePromptByIndex(index: number){
             </button> -->
             <LuToggle v-model="isIntermediateSteps">Intermediate steps</LuToggle>
             <BizConfigModelSelect v-model="modelConfig"></BizConfigModelSelect>
+            <UButton class="ml-3" color="red" @click="clearChatHistory">Clear Chat History</UButton>
           </div>
           <button
             type="submit"
